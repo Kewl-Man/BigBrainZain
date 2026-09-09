@@ -1,0 +1,6 @@
+{
+  "name": "BigBrainZain.com",
+  "description": "ZainHub V2 Ecosystem - The legendary unblocked games arcade.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

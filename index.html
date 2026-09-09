@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BigBrainZain.com | ZainHub V2</title>
+    <meta name="description" content="ZainHub V2 Ecosystem - The legendary unblocked games arcade." />
+    <meta property="og:title" content="BigBrainZain.com | ZainHub V2" />
+    <link rel="stylesheet" href="/style.css">
+    
+    <!-- Supabase CDN (No NPM packages used) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- Font Awesome for sleek icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Cosmic & Topographical Backgrounds -->
+    <div id="topo-bg"></div>
+    <canvas id="stars-canvas"></canvas>
+
+    <!-- Main UI Container -->
+    <div id="app-container">
+        <!-- Header -->
+        <header class="glass-panel">
+            <div class="logo">
+                <img src="https://i.8upload.com/image/eb403f0f9b58a3d2/bbz-com-2-0-logo.png" style="height: 48px; object-fit: contain;" alt="BBZ Logo">
+                <span class="logo-text">BBZ.com</span>
+            </div>
+            
+            <div class="search-bar">
+                <i class="fa-solid fa-search"></i>
+                <input type="text" id="search-input" placeholder="Search for games...">
+            </div>
+            
+            <div class="user-controls">
+                <button id="login-btn" class="glass-btn">
+                    <i class="fa-solid fa-rocket"></i> Login / Sign up
+                </button>
+                <div id="user-profile" class="hidden glass-panel-sm" style="cursor: pointer;" title="Edit Profile">
+                    <img id="avatar-img" class="avatar" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23fff'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>" alt="Avatar">
+                    <span id="user-email"></span>
+                </div>
+                <button id="logout-btn" class="hidden" title="Sign Out"><i class="fa-solid fa-sign-out-alt"></i></button>
+            </div>
+        </header>
+
+        <main>
+            <!-- Search Results Section -->
+            <section class="game-category hidden" id="section-search-results">
+                <h2>Search Results <i class="fa-solid fa-search neon-accent-text" style="font-size:1.2rem; margin-left: 5px;"></i></h2>
+                <div class="game-row" id="search-results"></div>
+            </section>
+
+            <!-- Hero Banner -->
+            <section class="hero glass-panel" id="hero-section">
+                <div class="hero-content" style="display: flex; justify-content: center; align-items: center; width: 100%;">
+                    <div class="hero-logo-wrapper">
+                        <img src="https://i.8upload.com/image/397eebf2f0184a0c/bigbrainzain-com-logo.png" alt="BigBrainZain.com" class="hero-logo" id="main-hero-logo">
+                    </div>
+                </div>
+            </section>
+
+            <!-- Game Categories -->
+            <section class="game-category" id="section-recently-played">
+                <h2>Recently Played</h2>
+                <div class="game-row" id="recently-played">
+                    <!-- Populated dynamically via Supabase / Mock Data -->
+                </div>
+            </section>
+
+            <section class="game-category">
+                <h2>Trending Globally <i class="fa-solid fa-fire neon-accent-text" style="font-size:1.2rem; margin-left: 5px;"></i></h2>
+                <div class="game-row" id="trending-games"></div>
+            </section>
+            
+            <section class="game-category">
+                <h2>Action & Adrenaline</h2>
+                <div class="game-row" id="action-games"></div>
+            </section>
+
+            <section class="game-category" id="section-discover">
+                <h2>Discover (Randomized)</h2>
+                <div class="game-row" id="discover-games"></div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Auth / Profile Modal (Glassmorphism) -->
+    <div id="auth-modal" class="modal-overlay hidden">
+        <div class="auth-panel glass-panel">
+            <button id="close-modal" class="icon-btn"><i class="fa-solid fa-times"></i></button>
+            
+            <!-- Login View -->
+            <div id="login-view">
+                <div class="auth-header">
+                    <i class="fa-solid fa-fingerprint neon-accent-text"></i>
+                    <h2>ZainHub Account</h2>
+                </div>
+                <p>Access the entire ZainHub ecosystem.</p>
+                <form id="auth-form">
+                    <div class="input-group">
+                        <i class="fa-solid fa-envelope"></i>
+                        <input type="email" id="auth-email" placeholder="Email Address" required>
+                    </div>
+                    <div class="input-group">
+                        <i class="fa-solid fa-lock"></i>
+                        <input type="password" id="auth-password" placeholder="Password" required>
+                    </div>
+                    <button type="submit" class="neon-btn">Secure Login / Register</button>
+                </form>
+            </div>
+
+            <!-- Profile Edit View -->
+            <div id="profile-view" class="hidden">
+                <div class="auth-header">
+                    <i class="fa-solid fa-user-astronaut neon-accent-text"></i>
+                    <h2>Edit Profile</h2>
+                </div>
+                <p>Customize your ZainHub identity.</p>
+                <form id="profile-form">
+                    <div class="profile-pic-upload">
+                        <img id="profile-preview" class="avatar-lg" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23fff'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>" alt="Preview">
+                        <label for="avatar-upload" class="glass-btn" style="font-size: 0.8rem; padding: 6px 12px; margin-top: 10px;">
+                            <i class="fa-solid fa-camera"></i> Change Picture
+                        </label>
+                        <input type="file" id="avatar-upload" accept="image/*" class="hidden">
+                    </div>
+                    <div class="input-group" style="margin-top: 20px;">
+                        <i class="fa-solid fa-user"></i>
+                        <input type="text" id="profile-username" placeholder="Username" required>
+                    </div>
+                    <button type="submit" class="neon-btn">Save Changes</button>
+                </form>
+            </div>
+
+            <p id="auth-msg"></p>
+        </div>
+    </div>
+
+    <!-- Panic Screen (Fake Google Classroom) -->
+    <div id="panic-screen" class="hidden">
+        <header class="classroom-header">
+            <div class="class-logo">
+                <i class="fa-solid fa-bars"></i>
+                <span style="color:#5f6368; font-weight: 500; font-size: 22px; margin-left:10px;">Google Classroom</span>
+            </div>
+            <div class="class-user"><div class="avatar-circle">S</div></div>
+        </header>
+        <div class="classroom-content">
+            <div class="class-card">
+                <div class="class-card-top" style="background-color: #1a73e8;">
+                    <h2>Mathematics 101</h2>
+                    <p>Mr. Smith</p>
+                </div>
+                <div class="class-card-bottom">
+                    <i class="fa-regular fa-folder" style="font-size: 20px;"></i>
+                </div>
+            </div>
+            <div class="class-card">
+                <div class="class-card-top" style="background-color: #1e8e3e;">
+                    <h2>Science - Period 3</h2>
+                    <p>Mrs. Johnson</p>
+                </div>
+                <div class="class-card-bottom">
+                    <i class="fa-regular fa-folder" style="font-size: 20px;"></i>
+                </div>
+            </div>
+            <div class="class-card">
+                <div class="class-card-top" style="background-color: #8e24aa;">
+                    <h2>History</h2>
+                    <p>Mr. Davis</p>
+                </div>
+                <div class="class-card-bottom">
+                    <i class="fa-regular fa-folder" style="font-size: 20px;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="/script.js"></script>
+</body>
+</html>
